@@ -16,7 +16,7 @@ In particular the shadow/passwords files should be group-owned by the group `sha
 ## Build
 
 	make
-	make install
+	sudo make install
 	ldconfig -v
 
 Then you update `/etc/nsswitch.conf` such as:

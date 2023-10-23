@@ -1,5 +1,12 @@
 # EGA PAM
 
+## installation
+
+	make
+	sudo make install
+
+## How it is built
+
 The login logic for the outbox is as follows:
 
 1) PAM gives us the username
@@ -68,7 +75,7 @@ what follows is the fuse command, minus the mountpoint. The latter will be appen
 There is no default
 
 
-# Improvements
+## Improvements
 
 After the fuse daemon is started, the parent might need to wait a bit for the python code to kick in.
 We could use a pipe to communicate with the parent and close the pipe when fuse is ready, effectively replacing the `waitpid` call.
