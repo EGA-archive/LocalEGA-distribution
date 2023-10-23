@@ -1,0 +1,33 @@
+#%PAM-1.0
+#
+# PAM configuration for the SFTP EGA service
+#
+
+# Check the passwords. Die if it fails. We don't allow root to try
+auth       requisite    pam_ega_auth.so
+
+# Make sure the home directory / environment exists (for safe-chrooting too)
+account    requisite    pam_ega_homedir.so subdir=outbox attrs=02700 bail_on_exists
+account    requisite    pam_ega_localnss.so group=fega display=submitters
+
+# No can do
+password   required     pam_deny.so
+
+
+session    requisite    pam_ega_mount.so \
+	                supp_group=fega \
+			umask=0007 \
+			unmount_on_close \
+			conf=notify_conf_fd:/etc/ega/db.conf \
+			lock=/run/%s.lock \
+			mnt=/home/%s/inbox \
+			child_notify=parent_fd \
+			pattern=/some/dir/%s/some/more/path \
+			-- ega-some-fuse \
+			   -f -s \
+			   -o rw,default_permissions,allow_root,fsname=EGAFS,max_idle_threads=2 \
+			   ...
+# pam_ega_mount will add:
+# -o notify_conf_fd=<n>
+# -o parent_fd=<n>
+# <converted_pattern> ... where the last one is the mounpoint
