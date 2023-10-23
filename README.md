@@ -30,3 +30,7 @@ You need to install the following components:
 * the [PAM modules](src/pam) (to create the user's homedirectory and automount its file system)
 * [patch and deploy the SFTP server](src/openssh)
 
+
+Once installed, you can extend the Vault database with [functions used
+by the file system](db). They allow the fuse filesystem to be smaller,
+as most string manipulation are done in the Postgres database itself.
