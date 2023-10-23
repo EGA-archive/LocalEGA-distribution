@@ -46,5 +46,14 @@ For the PAM modules (aka automount)
 	sudo make install
 	popd
 
+For the file system (aka fuse)
+
+	pushd src/fuse
+	autoreconf
+	./configure
+	make
+	sudo make install
+	popd
+
 Finally, [patch and deploy the SFTP server](src/openssh/README.md)
 
