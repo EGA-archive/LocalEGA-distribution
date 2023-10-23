@@ -46,12 +46,5 @@ For the PAM modules (aka automount)
 	sudo make install
 	popd
 
-For the SFTP server
-
-	pushd src/openssh
-	patch -p1 ../patches/systemd.patch # if needed
-	patch -p1 ../patches/sftp.patch
-	make
-	sudo make install-nosysconf
-	popd
+Finally, [patch and deploy the SFTP server](src/openssh/README.md)
 
