@@ -264,7 +264,7 @@ BEGIN
                                                       , number_recipient_keys)::bigint AS filesize,
 	       1::int4 AS num_datasets, -- count(distinct dft.dataset_id)
 	       ft.display_name ||
-	       CASE WHEN pft.mount_point = '/data_extra/hsm/vault/archive' THEN '.unavailable.c4gh'
+	       CASE WHEN pft.mount_point = '/path/to/cold/vault' THEN '.unavailable.c4gh'
 	       ELSE '.c4gh' END AS display_name,
 	       -- dft.display_name || '.c4gh' AS display_name,
 	       extract(epoch from pft.created_at)::bigint  AS ctime,
@@ -276,8 +276,7 @@ BEGIN
 	INNER JOIN private.file_table pft ON pft.id = dft.file_id
 	INNER JOIN public.file_table ft ON ft.id = dft.file_id
 	-- we hard-coded the header size to 124
-	WHERE -- pdft.mount_point <> '/data_extra/hsm/vault/archive' AND
-	      dt.stable_id = _dataset_stable_id
+	WHERE dt.stable_id = _dataset_stable_id
 	      AND CASE
                        WHEN _filename IS NOT NULL
 		       THEN --dft.stable_id = SUBSTRING(_filename, 1, 15)
@@ -320,8 +319,7 @@ END; $_$;
 
 
 --
--- The headers come from a FDW to ega-db
--- to be re-encrypted from the master key to the user public key.
+-- The headers are re-encrypted from the master key to the user public key.
 -- 
 
 CREATE OR REPLACE FUNCTION fs.get_file_info(_username varchar,
