@@ -3,7 +3,7 @@
 -- ############################################
 -- Specific user for distribution permissions
 -- ############################################
-CREATE USER outgestion WITH LOGIN ENCRYPTED PASSWORD 'change-me';
+CREATE USER distribution WITH LOGIN ENCRYPTED PASSWORD 'change-me';
 
 -- ############################################
 --        NSS <--> DB user IDs conversions

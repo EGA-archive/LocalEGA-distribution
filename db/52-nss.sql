@@ -79,11 +79,6 @@ $BODY$;
 -- ################################################
 -- Rebuild the groups cache
 -- ################################################
-CREATE VIEW public.groups AS
-SELECT name  AS groupname,
-       id    AS gid
-FROM public.group_table
-WHERE is_enabled = true;
 
 CREATE OR REPLACE FUNCTION fs.make_nss_groups()
 RETURNS void
@@ -95,17 +90,12 @@ BEGIN
 	RAISE NOTICE 'Updating groups in %', current_setting('nss.groups');
 	_query := format('
 	COPY (
-            WITH mems AS (SELECT r.gid, ugt.group_id, r.username AS username
-                          FROM public.requesters r
-                          LEFT JOIN public.user_group_table ugt ON r.db_uid = ugt.user_id 
-                      )
-	SELECT g.groupname,
-	       ''x'', -- no password 
-	       g.gid, 
-               string_agg(DISTINCT mems.username::text, '','') AS members
-	FROM public.groups g
-	LEFT JOIN mems ON mems.gid=g.gid OR mems.group_id=g.gid
-	GROUP BY g.groupname, g.gid
+		SELECT ''requesters'' AS groupname,
+	       		''x'', -- no password 
+	       		r.group_id, 
+               		string_agg(DISTINCT r.username::text, '','') AS members
+		FROM public.requesters r 
+		GROUP BY r.group_id
 	)
 	TO ''%s''
 	DELIMITER '':'' NULL '''';', current_setting('nss.groups'));

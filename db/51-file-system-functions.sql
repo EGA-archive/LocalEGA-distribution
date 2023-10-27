@@ -115,7 +115,7 @@ END; $_$;
 --          DATASETS
 -- ###################################################
 
-CREATE FUNCTION fs.lookup_dataset(_userid bigint,
+CREATE or replace FUNCTION fs.lookup_dataset(_userid bigint,
        			          _dataset  varchar)
 RETURNS TABLE(ino bigint, stable_id text, ctime bigint, mtime bigint, num_files int4)
 LANGUAGE plpgsql AS $_$
@@ -176,7 +176,7 @@ BEGIN
 
 END; $_$;
 
-CREATE FUNCTION fs.get_datasets(_userid     bigint,
+CREATE OR REPLACE FUNCTION fs.get_datasets(_userid     bigint,
                                 _offset   bigint,
 				_limit    bigint)--DEFAULT 1000000)
 RETURNS TABLE(ino bigint, display_name text, ctime bigint, mtime bigint, nlink int4, size bigint)
@@ -215,8 +215,6 @@ RETURNS TABLE(ino bigint, stable_id text, filesize bigint, num_datasets int4, di
 LANGUAGE plpgsql AS $_$
 DECLARE
 	number_recipient_keys int;
-	--_fileid               varchar;
-	_filename_tmp         varchar;
 BEGIN
 
 	-- NOTE: _userid is already the correct DB-shifted id
@@ -233,22 +231,10 @@ BEGIN
     END IF;
 
     IF _filename IS NOT NULL THEN
-        --_fileid:= SUBSTRING( _filename, 1, 15);
-
-    	-- _filename := substring(_filename from '(?(?=.*\.unavailable\.c4gh$)((.*)\.unavailable\.c4gh)|((.*)\.c4gh))$');
-    	-- IF _filename IS NULL THEN
-	--    RAISE EXCEPTION 'invalid filename or not a C4GH file';
-    	-- END IF;
-	
     	_filename := substring(_filename from '(.*)\.c4gh$'); -- remove .c4gh
     	IF _filename IS NULL THEN
 	   RAISE EXCEPTION 'invalid filename or not a C4GH file';
     	END IF;
-	-- Check for .unavailable
-    	_filename_tmp := substring(_filename from '(.*)\.unavailable$'); -- remove .unavailable
-    	IF _filename_tmp IS NOT NULL THEN
-    	   _filename := _filename_tmp;
-	END IF;
 	RAISE NOTICE 'extracted filename: %', _filename;
     END IF;
  
@@ -260,7 +246,7 @@ BEGIN
 	       fs.file2ino(ft.stable_id, pft.mount_point = '/data_extra/hsm/vault/archive')
 	                     AS ino,
                ft.stable_id AS stable_id,
-	       pft.payload_size::bigint + fs.header_size(pft.header_size -- 124
+	       pft.payload_size::bigint + fs.header_size(octet_length(pft.header) -- 124
                                                       , number_recipient_keys)::bigint AS filesize,
 	       1::int4 AS num_datasets, -- count(distinct dft.dataset_id)
 	       ft.display_name ||
@@ -271,10 +257,10 @@ BEGIN
                extract(epoch from pft.edited_at)::bigint   AS mtime,
 	       fs.decrypted_filesize(pft.payload_size::bigint)::text AS decrypted_filesize
 	FROM public.dataset_table dt
-	INNER JOIN public.dataset_file_table dft ON dft.dataset_id = dt.id
+	INNER JOIN public.dataset_file_table dft ON dft.dataset_stable_id = dt.stable_id
 	-- no join with public.dataset_table because get_datasets() already checked if released
-	INNER JOIN private.file_table pft ON pft.id = dft.file_id
-	INNER JOIN public.file_table ft ON ft.id = dft.file_id
+	INNER JOIN private.file_table pft ON pft.stable_id = dft.file_stable_id
+	INNER JOIN public.file_table ft ON ft.stable_id = dft.file_stable_id
 	-- we hard-coded the header size to 124
 	WHERE dt.stable_id = _dataset_stable_id
 	      AND CASE
@@ -290,7 +276,7 @@ $_$;
 
 
 
-CREATE FUNCTION fs.get_files(_userid            bigint,
+CREATE OR REPLACE FUNCTION fs.get_files(_userid            bigint,
                              _dataset_stable_id varchar,
                              _offset            bigint,
                              _limit             bigint)
@@ -331,12 +317,6 @@ DECLARE
 	_file_stable_id varchar;
 BEGIN
 
-    IF _file_ino > 300000000000 AND _file_ino < 400000000000
-    THEN
-       RAISE EXCEPTION 'Not available';
-       -- RETURN QUERY SELECT NULL AS filepath, NULL AS header;
-    END IF;
-
     -- Get the user_id from the name
     SELECT id INTO user_number_id
     FROM public.user_table ut
@@ -362,7 +342,7 @@ BEGIN
            -- we can return the payload size and real filesize too
 	   -- but fuse will open the file and use lseek to the end
     FROM private.file_table pft
-    INNER JOIN public.file_table ft ON ft.id = pft.id
+    INNER JOIN public.file_table ft ON ft.stable_id = pft.stable_id
     INNER JOIN private.username_file_header v ON v.stable_id = ft.stable_id
     WHERE v.user_id = user_number_id
       AND v.reencrypted_header IS NOT NULL
@@ -417,7 +397,7 @@ $_$;
 
 
 
-CREATE FUNCTION fs.lookup(_username varchar,
+CREATE OR REPLACE FUNCTION fs.lookup(_username varchar,
        			  _parent_ino bigint,
 			  _name varchar)
 RETURNS TABLE(ino bigint, ctime bigint, mtime bigint, nlink int4, size bigint, decrypted_filesize text, is_dir boolean)
@@ -517,13 +497,13 @@ BEGIN
 	SELECT extract(epoch from pft.created_at)::bigint  AS ctime,
                extract(epoch from pft.edited_at)::bigint   AS mtime,
 	       1::int4 AS nlink, -- count(distinct dft.dataset_id)
-	       ft.filesize::bigint - 124 + fs.header_size(pft.header_size, -- 124
+	       ft.filesize::bigint - 124 + fs.header_size(octet_length(pft.header), -- 124
                                                     number_recipient_keys)::bigint
 						           AS size,
 	       fs.decrypted_filesize(pft.payload_size)::text AS decrypted_size,
 	       FALSE::boolean                      AS is_dir
 	FROM public.file_table ft
-	INNER JOIN private.file_table pft ON pft.id = ft.id
+	INNER JOIN private.file_table pft ON pft.stable_id = ft.stable_id
 	-- no join with public.dataset_table because get_datasets() already checked if released
 	WHERE ft.stable_id = _stable_id
 	LIMIT 1;

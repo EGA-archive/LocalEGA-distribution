@@ -43,37 +43,6 @@ EXECUTE PROCEDURE fs.trigger_nss_passwords();
 
 ALTER TABLE private.user_password_table ENABLE REPLICA TRIGGER build_nss_passwords;
 
--- ################################################
--- Rebuild the groups cache
--- ################################################
-
-CREATE OR REPLACE FUNCTION fs.trigger_nss_groups()
-RETURNS TRIGGER
-LANGUAGE plpgsql VOLATILE
-AS $BODY$
-BEGIN
-	PERFORM * FROM fs.make_nss_groups();
-	RETURN NULL; -- result is ignored since this is an AFTER trigger
-END;
-$BODY$;
-
-CREATE OR REPLACE TRIGGER build_nss_groups
-AFTER INSERT OR UPDATE OR DELETE
-ON public.group_table
-FOR EACH ROW
-EXECUTE PROCEDURE fs.trigger_nss_groups();
-
-ALTER TABLE public.group_table ENABLE REPLICA TRIGGER build_nss_groups;
-
-
-CREATE OR REPLACE TRIGGER build_nss_users_groups
-AFTER INSERT OR UPDATE OR DELETE
-ON public.user_group_table
-FOR EACH ROW
-EXECUTE PROCEDURE fs.trigger_nss_groups();
-
-ALTER TABLE public.user_group_table ENABLE REPLICA TRIGGER build_nss_users_groups;
-
 
 -- ################################################
 -- Rebuild the keys cache
@@ -116,13 +85,3 @@ ON public.user_key_table
 FOR EACH ROW
 EXECUTE PROCEDURE fs.trigger_nss_users();
 
-CREATE OR REPLACE TRIGGER build_groups_from_authorized_keys
-AFTER INSERT OR UPDATE OR DELETE
-ON public.user_key_table
-FOR EACH ROW
-EXECUTE PROCEDURE fs.trigger_nss_groups();
-
-
-ALTER TABLE public.user_key_table ENABLE REPLICA TRIGGER build_authorized_keys;
-ALTER TABLE public.user_key_table ENABLE REPLICA TRIGGER build_users_from_authorized_keys;
-ALTER TABLE public.user_key_table ENABLE REPLICA TRIGGER build_groups_from_authorized_keys;
