@@ -1,27 +1,25 @@
 # Distribution system for a Federated EGA node
 
+This repository contains the code part of the [LocalEGA software stack](https://github.com/EGA-archive/LocalEGA).  
+It allows the distribution of Crypt4GH-encrypted files.
 
-This contains...
 
-
-## Required packages
-
+The required packages are:
 * libfuse 3
-* openssl
+* OpenSSL
 * libpq
 * glib-2.0
-* make cmake gcc git autoconf ...
+* Compilation tools: make cmake gcc git autoconf ...
 * patch
+* PAM
 
+On Debian/Ubuntu, you can install the dependencies with:
 ```bash
     apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates pkg-config git gcc cmake make automake autoconf patch \
             libssl-dev libpq-dev libpam0g-dev libglib2.0-dev libfuse3-dev
 ```
-
-
-## Installation
 
 You need to install the following components:
 
