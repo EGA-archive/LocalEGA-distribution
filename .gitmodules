@@ -1,9 +1,9 @@
 [submodule "openssh"]
 	path = src/openssh/src
 	url = https://github.com/openssh/openssh-portable.git
-[submodule "pg_sqlite_fs"]
-	path = src/pg_sqlite_fs
-	url = https://github.com/silverdaz/pg_sqlite_fs.git
 [submodule "src/crypt4gh-sqlite"]
 	path = src/crypt4gh-sqlite
 	url = https://github.com/silverdaz/crypt4gh-sqlite.git
+[submodule "src/pg_sqlite_fs"]
+	path = src/pg_sqlite_fs
+	url = https://github.com/silverdaz/pg_sqlite_fs.git
