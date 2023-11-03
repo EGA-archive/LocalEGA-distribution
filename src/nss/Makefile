@@ -6,11 +6,11 @@ NSS_LD_SONAME = -Wl,-soname,libnss_egafiles.so.2
 NSS_LIBRARY = libnss_egafiles.so.2.0
 NSS_ARCHIVE = libnss_egafiles.a
 
-EGA_LIBDIR = /usr/local/lib
+EGA_LIBDIR = /opt/LocalEGA/lib
 
-DEFINES+=-DEGAFILES_USERS_PATH=\"/etc/ega/nss/users\"
-DEFINES+=-DEGAFILES_GROUPS_PATH=\"/etc/ega/nss/groups\"
-DEFINES+=-DEGAFILES_PASSWORDS_PATH=\"/etc/ega/nss/passwords\"
+DEFINES+=-DEGAFILES_USERS_PATH=\"/opt/LocalEGA/etc/nss/users\"
+DEFINES+=-DEGAFILES_GROUPS_PATH=\"/opt/LocalEGA/etc/nss/groups\"
+DEFINES+=-DEGAFILES_PASSWORDS_PATH=\"/opt/LocalEGA/etc/nss/passwords\"
 
 CC=gcc
 LD=ld
