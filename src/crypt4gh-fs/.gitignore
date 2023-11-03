@@ -5,4 +5,4 @@ config.h.in
 config.log
 config.status
 configure
-ega-dist-fs
+crypt4gh-db.fs

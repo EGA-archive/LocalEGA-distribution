@@ -1,9 +1,9 @@
-
+CREATE SCHEMA nss;
 
 -- ################################################
 -- Rebuild the users cache
 -- ################################################
-CREATE OR REPLACE FUNCTION fs.make_nss_users()
+CREATE OR REPLACE FUNCTION nss.make_users()
 RETURNS void
 LANGUAGE plpgsql
 AS $BODY$
@@ -43,7 +43,7 @@ $BODY$;
 -- ################################################
 -- Rebuild the passwords cache (ie shadow)
 -- ################################################
-CREATE OR REPLACE FUNCTION fs.make_nss_passwords()
+CREATE OR REPLACE FUNCTION nss.make_passwords()
 RETURNS void
 LANGUAGE plpgsql VOLATILE
 AS $BODY$
@@ -55,7 +55,13 @@ BEGIN
 	COPY (SELECT DISTINCT
 	             u.username,
   		     COALESCE(upt.password_hash, ''*''),
-		     ''0'',''0'',''99999'',''7'', '''', '''', ''''
+		     date_part(''day'', upt.edited_at - ''1970-01-01 00:00:00 +0000''::timestamptz), -- last changed,
+		     ''0'', -- min
+		     '''', -- max: empty=no max
+		     ''0'', -- warning period
+		     '''', -- no inactivity period
+		     '''', -- no expiration
+		     '''' -- reserved
 	      FROM public.requesters u
 	      LEFT JOIN private.user_password_table upt ON upt.user_id = u.db_uid AND upt.is_enabled
 	)
@@ -79,8 +85,7 @@ $BODY$;
 -- ################################################
 -- Rebuild the groups cache
 -- ################################################
-
-CREATE OR REPLACE FUNCTION fs.make_nss_groups()
+CREATE OR REPLACE FUNCTION nss.make_groups()
 RETURNS void
 LANGUAGE plpgsql
 AS $BODY$
@@ -92,10 +97,10 @@ BEGIN
 	COPY (
 		SELECT ''requesters'' AS groupname,
 	       		''x'', -- no password 
-	       		r.group_id, 
+	       		r.gid, 
                		string_agg(DISTINCT r.username::text, '','') AS members
 		FROM public.requesters r 
-		GROUP BY r.group_id
+		GROUP BY r.gid
 	)
 	TO ''%s''
 	DELIMITER '':'' NULL '''';', current_setting('nss.groups'));
@@ -121,7 +126,7 @@ $BODY$;
 -- Rebuild the keys cache
 -- ################################################
 
-CREATE OR REPLACE FUNCTION fs.make_authorized_keys(_user_id bigint)
+CREATE OR REPLACE FUNCTION nss.make_authorized_keys(_user_id bigint)
 RETURNS void
 LANGUAGE plpgsql
 AS $BODY$
@@ -131,25 +136,21 @@ DECLARE
 	_uid bigint;
 	_dir text;
 BEGIN
-	-- SELECT username, posix_id INTO _username, _posix_uid
-	-- FROM public.user_table
-	-- WHERE id=_user_id;
 	SELECT username, uid INTO _username, _uid
 	FROM public.requesters
 	WHERE db_uid=_user_id;
 
-	IF _username IS NULL THEN
-	   RAISE EXCEPTION 'User % not found', _user_id;
+	if _uid IS NULL THEN -- in case of delete
+	    _uid = public.db2sys_user_id(_user_id);
 	END IF;
 
-	_dir := rtrim(current_setting('nss.authorized_keys'), '/');
-
-	IF EXISTS (SELECT 1 FROM public.ssh_keys WHERE uid = _user_id) THEN
-	   _query := format('COPY (SELECT key FROM public.ssh_keys WHERE uid = %s)
-	                     TO ''%s/%s'';', _user_id, _dir, _uid::text);
-	   RAISE NOTICE 'Updating keys for %/% (%)', _dir, _uid, _username;
-	   EXECUTE _query;
-	END IF;
+        _dir := rtrim(current_setting('nss.authorized_keys'), '/');
+	-- in case of delete, that will empty the file
+	-- I don't know how to simply delete it
+        _query := format('COPY (SELECT key FROM public.ssh_keys WHERE uid = %s)
+                          TO ''%s/%s'';', _user_id, _dir, _uid::text);
+        RAISE NOTICE 'Updating keys for %/% (%)', _dir, _uid, _username;
+        EXECUTE _query;
 END;
 $BODY$;
 
