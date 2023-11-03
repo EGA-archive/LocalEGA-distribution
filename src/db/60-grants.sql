@@ -34,3 +34,6 @@ GRANT EXECUTE ON FUNCTION fs.make_nss_passwords() TO lega;
 GRANT EXECUTE ON FUNCTION fs.make_nss_groups() TO lega;
 GRANT EXECUTE ON FUNCTION fs.trigger_authorized_keys() TO lega;
 GRANT EXECUTE ON FUNCTION fs.make_authorized_keys TO lega;
+GRANT SELECT ON TABLE public.requesters TO lega;
+GRANT SELECT ON TABLE public.ssh_keys TO lega;
+
