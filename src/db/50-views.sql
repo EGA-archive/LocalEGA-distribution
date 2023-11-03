@@ -1,7 +1,7 @@
 --
 -- We return SSH keys only if at least one crypt4gh key exists for the given user
 --
-CREATE VIEW public.ssh_keys AS
+CREATE OR REPLACE VIEW public.ssh_keys AS
 SELECT --DISTINCT 
 	ut.id 	AS uid,
        ut.username  AS username,
@@ -16,7 +16,7 @@ WHERE (-- uk.is_enabled = true
       );
 
 
-CREATE VIEW public.header_keys AS
+CREATE OR REPLACE VIEW public.header_keys AS
 SELECT --DISTINCT 
        ut.id        AS user_id,
        ut.username  AS username,
@@ -36,7 +36,7 @@ WHERE (-- uk.is_enabled = true
 -- We hard-code the group as requesters: 10000
 -- We don't show the passwords
 --
-CREATE VIEW public.requesters AS
+CREATE OR REPLACE VIEW public.requesters AS
 SELECT DISTINCT
        db2sys_user_id(ut.id)               	AS uid,
        ut.id                                     AS db_uid,

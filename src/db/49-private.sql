@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS private;
 
-CREATE VIEW private.header_user_keys AS
+CREATE OR REPLACE VIEW private.header_user_keys AS
   SELECT ukt.user_id,
     ukt.key,
     ukt.type
@@ -10,7 +10,7 @@ CREATE VIEW private.header_user_keys AS
 
 -- View to get re-encrypted headers
 --maybe like this to add the public datasets? but how did we do this in the current one?
-CREATE VIEW private.username_file_header AS
+CREATE OR REPLACE VIEW private.username_file_header AS
 SELECT ut.id           AS user_id,
        ut.username     AS username,
        pubft.stable_id AS stable_id,
