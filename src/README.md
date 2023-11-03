@@ -15,10 +15,10 @@ uncomment `user_allow_other` in /usr/local/etc/fuse.conf
 
 ## Install the live distribution: crypt4gh-db.fs
 
-autoreconf -i
-./configure --prefix=/opt/LocalEGA
-make
-sudo make install
+	autoreconf -i
+	./configure --prefix=/opt/LocalEGA
+	make
+	sudo make install
 
 Create fs.conf for the crypt4gh-db.fs
 
@@ -26,8 +26,8 @@ Create fs.conf for the crypt4gh-db.fs
 
 ## Install the NSS module
 
-make 
-sudo make install
+	make 
+	sudo make install
 
 echo '/opt/LocalEGA/lib' > /etc/ld.so.conf.d/LocalEGA.conf
 
@@ -48,15 +48,15 @@ In the Vault database, load the SQL files:
 Update the `nss.*` configurations in `pg.conf`
 
 	# Create the landing directories for the NSS files
-	$ docker-compose exec --user root vault-db chown postgres /etc/ega/nss
-	$ docker-compose exec --user root vault-db chown postgres /etc/ega/authorized_keys
+	docker-compose exec --user root vault-db chown postgres /etc/ega/nss
+	docker-compose exec --user root vault-db chown postgres /etc/ega/authorized_keys
 	
 	# Call the NSS file creation
-	$ make nss
+	make nss
 
 And test it
 
-	$ id jane
-	uid=10001(jane) gid=20000(requesters) groups=20000(requesters)
+	id jane
+	# You should see: uid=10001(jane) gid=20000(requesters) groups=20000(requesters)
 
 
