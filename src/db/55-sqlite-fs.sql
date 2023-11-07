@@ -2,11 +2,11 @@
 
 
 CREATE OR REPLACE FUNCTION sqlite_fs.generate_box_checks(_username text, _datasets text[])
-  RETURNS bigint AS $BODY$
-  DECLARE
+RETURNS bigint AS $BODY$
+DECLARE
      _user_id int8;
      _number_recipient_keys integer;
-  BEGIN
+BEGIN
 
 	SELECT id INTO _user_id	FROM public.user_table where username=_username;
 
@@ -23,15 +23,14 @@ CREATE OR REPLACE FUNCTION sqlite_fs.generate_box_checks(_username text, _datase
 
 	RETURN _user_id;
 
-    END;
- $BODY$
- LANGUAGE plpgsql VOLATILE
- COST 100;
+END;
+$BODY$
+LANGUAGE plpgsql;
 
 
-  CREATE OR REPLACE FUNCTION sqlite_fs.generate_box(_username text, _datasets text[], _reset_box bool default false)
-  RETURNS text AS $BODY$
-	DECLARE
+CREATE OR REPLACE FUNCTION sqlite_fs.generate_box(_username text, _datasets text[], _reset bool default false)
+RETURNS text AS $BODY$
+DECLARE
 	_user_id int8;
 	_error_message text;
 BEGIN
@@ -44,33 +43,34 @@ BEGIN
 	    RETURN _error_message;
         END;
 
-	PERFORM * FROM sqlite_fs.generate_sqlite_box(_username, _user_id, _datasets, _reset_box);
+	PERFORM * FROM sqlite_fs.generate_sqlite_box(_username, _user_id, _datasets, _reset);
 
 	RETURN 'OK';
 
- END;
- $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+END;
+$BODY$
+LANGUAGE plpgsql;
 
-  CREATE OR REPLACE FUNCTION sqlite_fs.generate_box(_username text, _reset_box bool default false)
-  RETURNS text AS $$
-  SELECT * FROM sqlite_fs.generate_box(_username, null, _reset_box)
-  $$ LANGUAGE SQL;
+CREATE OR REPLACE FUNCTION sqlite_fs.generate_box(_username text, _reset bool default false)
+RETURNS text AS $BODY$
+SELECT * FROM sqlite_fs.generate_box(_username, null, _reset)
+$BODY$
+LANGUAGE SQL;
 
 
-  CREATE OR REPLACE FUNCTION sqlite_fs.generate_sqlite_box(_username text, _user_id int8, _datasets text[], _reset_box bool)
-  RETURNS void AS $BODY$
-  --do not call directly
-  DECLARE
+CREATE OR REPLACE FUNCTION sqlite_fs.generate_sqlite_box(_username text, _user_id int8, _datasets text[], _reset bool)
+RETURNS void AS $BODY$
+--do not call directly
+DECLARE
    _box_path text;
-  BEGIN
+BEGIN
 
  	SELECT concat_ws('', current_setting('sqlite_fs.location'), '/', _user_id, '.sqlite') INTO _box_path;
 
 	RAISE NOTICE 'path for box is %', _box_path;
 
- 	IF (_reset_box) THEN
+ 	IF (_reset) THEN
+	        RAISE NOTICE 'Deleting %', _box_path;
  		PERFORM sqlite_fs.remove(_box_path); -- maybe better just truncate
  	END IF;
 
@@ -85,7 +85,7 @@ BEGIN
 		WHERE CASE WHEN _datasets IS NULL THEN TRUE ELSE display_name=ANY(_datasets) END
 	), files AS (
 	   	SELECT f.ino,
-		       LEFT(f.display_name, length(f.display_name) - 5), -- strip .c4gh
+		       f.display_name, -- it contains .c4gh
 		       f.ctime,
 		       f.mtime,
 		       f.nlink,
@@ -126,7 +126,6 @@ BEGIN
 	-- We force the execution of the inserted_entries CTE. If not, it skips it
         ); -- close PERFORM
 
- END;
- $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
+END;
+$BODY$
+LANGUAGE plpgsql;
