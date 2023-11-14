@@ -4,30 +4,28 @@
 #
 
 # Check the passwords. Die if it fails. We don't allow root to try
-auth       requisite    pam_ega_auth.so
+auth       requisite    /opt/LocalEGA/security/pam_ega_auth.so
 
 # Make sure the home directory / environment exists (for safe-chrooting too)
-account    requisite    pam_ega_homedir.so subdir=outbox attrs=02700 bail_on_exists
-account    requisite    pam_ega_localnss.so group=fega display=submitters
+account    requisite    /opt/LocalEGA/security/pam_ega_homedir.so subdir=outbox attrs=02700 bail_on_exists
+account    requisite    /opt/LocalEGA/security/pam_ega_localnss.so group=lega display=requesters
 
 # No can do
 password   required     pam_deny.so
 
 
-session    requisite    pam_ega_mount.so \
+session    requisite    /opt/LocalEGA/security/pam_ega_mount.so \
 	                supp_group=fega \
 			umask=0007 \
 			unmount_on_close \
-			conf=notify_conf_fd:/etc/ega/db.conf \
+			conf=notify_conf_fd:/opt/LocalEGA/etc/fuse-vault-db.conf \
 			lock=/run/%s.lock \
-			mnt=/home/%s/inbox \
+			mnt=/opt/LocalEGA/home/%s/outbox \
 			child_notify=parent_fd \
-			pattern=/some/dir/%s/some/more/path \
-			-- ega-some-fuse \
-			   -f -s \
-			   -o rw,default_permissions,allow_root,fsname=EGAFS,max_idle_threads=2 \
-			   ...
+			-- /opt/LocalEGA/bin/crypt4gh-db.fs \
+			   -f \
+			   -o ro,default_permissions,allow_root,fsname=EGAFS,max_idle_threads=2
 # pam_ega_mount will add:
 # -o notify_conf_fd=<n>
 # -o parent_fd=<n>
-# <converted_pattern> ... where the last one is the mounpoint
+# ... and the mounpoint

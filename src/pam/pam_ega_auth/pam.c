@@ -159,6 +159,13 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 }
 
 
+PAM_EXTERN int
+pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
+{
+  /* D1("Set cred allowed"); */
+  return PAM_SUCCESS;
+}
+
 static void
 pam_auth_options(struct options_s *opts, int argc, const char **argv)
 {
