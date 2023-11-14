@@ -60,3 +60,7 @@ And test it
 	# You should see: uid=10001(jane) gid=20000(requesters) groups=20000(requesters)
 
 
+For the Crypt4GH-fuse:
+	
+	cp crypt4gh-fs/fs.conf.sample /opt/LocalEGA/etc/fuse-vault-db.conf
+	chmod 600 /opt/LocalEGA/etc/fuse-vault-db.conf

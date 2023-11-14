@@ -3,11 +3,11 @@ Port 22
 PidFile /run/ega-sshd/sshd.pid
 #Protocol 2 # deprecated
 
-Banner  /etc/ega/sshd/banner
+Banner  /opt/LocalEGA/etc/sshd/banner
 
-HostKey /etc/ega/sshd/host_ed25519_key
-HostKey /etc/ega/sshd/host_rsa_key
-HostKey /etc/ega/sshd/host_dsa_key
+HostKey /opt/LocalEGA/etc/sshd/host_ed25519_key
+HostKey /opt/LocalEGA/etc/sshd/host_rsa_key
+HostKey /opt/LocalEGA/etc/sshd/host_dsa_key
 
 AcceptEnv LANG LC_ALL LANGUAGE
 
@@ -45,26 +45,18 @@ Subsystem sftp internal-sftp -d outbox -R
 ForceCommand internal-sftp -d outbox -R
 # with/without "-l VERBOSE"
 
-# Chroot to /home/<username>
-#ChrootDirectory /home/%u
-# Chroot to /home/<user_id>
-#ChrootDirectory /home/%U
-
-# Chroot to <homedir> (whether it is /home/<id>, or /home/<username>, or other...)
+# Chroot to <homedir> (whether it is /home/<id>, or /home/<username>, /opt/LocalEGA/home/username/, or other...)
 ChrootDirectory %h
 
 ###############################
 # Retrieving the SSH public keys
 ###############################
 
-AuthorizedKeysCommand /usr/bin/cat /etc/ega/authorized_keys/%U
+AuthorizedKeysCommand /usr/bin/cat /opt/LocalEGA/etc/authorized_keys/%U
 AuthorizedKeysCommandUser postgres
 # %u = username 
 # %U = userid
-
 ## We don't use the files directly cuz they are not owned by the users.
-## Alternatively, we make a fuse that passes through the files and sets the right ownership.
-#AuthorizedKeysFile /etc/ega/cache/authorized_keys/%u
 
 Compression no
 

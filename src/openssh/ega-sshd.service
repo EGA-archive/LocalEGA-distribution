@@ -2,20 +2,15 @@
 Description=OpenBSD Secure Shell server for EGA requesters
 Documentation=man:sshd(8) man:sshd_config(5)
 After=network.target auditd.service
-ConditionPathExists=!/etc/ega/sshd_not_to_be_run
+ConditionPathExists=!/opt/LocalEGA/etc/sshd/not_to_be_run
 
 [Service]
-EnvironmentFile=-/etc/ega/sshd_options
+EnvironmentFile=-/opt/LocalEGA/etc/sshd/options
 
 # This will use /etc/pam.d/ega
-ExecStartPre=/opt/openssh/sbin/sshd -t -f /etc/ega/sshd_config
-ExecStart=/opt/openssh/sbin/sshd -D -f /etc/ega/sshd_config $SSHD_OPTS
-ExecReload=/opt/openssh/sbin/sshd -t -f /etc/ega/sshd_config
-
-# This will use /etc/pam.d/sshd
-# ExecStartPre=/usr/sbin/sshd -t -f /etc/ega/sshd_config
-# ExecStart=/usr/sbin/sshd -D -f /etc/ega/sshd_config $SSHD_OPTS
-# ExecReload=/usr/sbin/sshd -t -f /etc/ega/sshd_config
+ExecStartPre=/opt/LocalEGA/sbin/sshd -t -f /opt/LocalEGA/etc/sshd/sshd_config
+ExecStart=/opt/LocalEGA/sbin/sshd -D -f /opt/LocalEGA/etc/sshd/sshd_config $SSHD_OPTS
+ExecReload=/opt/LocalEGA/sbin/sshd -t -f /opt/LocalEGA/etc/sshd/sshd_config
 
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
@@ -23,7 +18,6 @@ Restart=on-failure
 RestartPreventExitStatus=255
 Type=notify
 RuntimeDirectory=ega-sshd
-#RuntimeDirectory=sshd
 RuntimeDirectoryMode=0755
 
 # PIDFile=/run/ega-sshd/sshd.pid

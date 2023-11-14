@@ -9,7 +9,7 @@ For Ubuntu, install the following packages:
 
 Then run the following to configure it with its own user/group and privilege-separation.
 
-	export OPENSSH_DIR=/opt/openssh
+	export OPENSSH_DIR=/opt/LocalEGA
 	export SSHD_UID=75
 	export SSHD_GID=75
 	export OPENSSH_PRIVSEP_PATH=/run/ega-sshd
@@ -32,10 +32,10 @@ Then run the following to configure it with its own user/group and privilege-sep
 	        -r \
 	        -d ${OPENSSH_PRIVSEP_PATH} ${OPENSSH_PRIVSEP_USER}
 
-
+	cd src
 	patch -p1 < ../patches/systemd-readyness.patch
 
-	patch -p1 < ../patches/ega.patch
+	patch -p1 < ../patches/sftp.patch
 
 	autoreconf
 	./configure --prefix=${OPENSSH_DIR} \
@@ -56,18 +56,25 @@ Then run the following to configure it with its own user/group and privilege-sep
 
 Create the new host keys
 
-	mkdir -p /etc/ega
-	rm -f /etc/ega/sshd_host_{rsa,dsa,ed25519}_key{,.pub}
-	/opt/openssh/bin/ssh-keygen -t ed25519 -N '' -f /etc/ega/sshd_host_ed25519_key
-	/opt/openssh/bin/ssh-keygen -t rsa     -N '' -f /etc/ega/sshd_host_rsa_key
-	/opt/openssh/bin/ssh-keygen -t dsa     -N '' -f /etc/ega/sshd_host_dsa_key
+	mkdir -p /opt/LocalEGA/etc/sshd
+	rm -f /opt/LocalEGA/etc/sshd/host_{rsa,dsa,ed25519}_key{,.pub}
+	/opt/LocalEGA/bin/ssh-keygen -t ed25519 -N '' -f /opt/LocalEGA/etc/sshd/host_ed25519_key
+	/opt/LocalEGA/bin/ssh-keygen -t rsa     -N '' -f /opt/LocalEGA/etc/sshd/host_rsa_key
+	/opt/LocalEGA/bin/ssh-keygen -t dsa     -N '' -f /opt/LocalEGA/etc/sshd/host_dsa_key
 
-Copy the System-D file into place
+Copy the system files into place
 
-	cp sshd_banner /etc/ega/sshd_banner
-	cp sshd_config /etc/ega/sshd_config
-	echo 'SSHD_OPTS=-o LogLevel=DEBUG3' > /etc/ega/sshd_options
-	cp pam.ega /etc/pam.d/ega
+	# For OpenSSH
+	echo 'Welcome to your LocalEGA outbox' > /opt/LocalEGA/etc/sshd/banner
+	cp sshd_config.sample /opt/LocalEGA/etc/sshd/sshd_config
+	# and adjust the paths, if necessary
+	
+	# For PAM
+	cp ../pam/pam.ega /etc/pam.d/ega
+	# and update accordingly
+	
+	# For the Systemd files
+	echo 'SSHD_OPTS=-o LogLevel=DEBUG3' > /opt/LocalEGA/etc/sshd/options
 	cp ega-sshd.service /etc/systemd/system/ega-sshd.service
 	systemctl daemon-reload
 	
