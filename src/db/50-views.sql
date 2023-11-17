@@ -43,7 +43,7 @@ SELECT DISTINCT
        ut.group_id                                AS gid,
        ut.username                               AS username,
        --(concat('/home/', ut.id))::varchar        AS homedir,
-       (concat('/home/', ut.username))::varchar  AS homedir,
+       (concat_ws('/', RTRIM(current_setting('nss.homes'), '/'), ut.username))::varchar  AS homedir,
        'EGA Requester'::varchar                  AS gecos,
        '/bin/bash'::varchar                      AS shell
 FROM public.user_table ut
