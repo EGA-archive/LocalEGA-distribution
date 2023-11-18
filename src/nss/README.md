@@ -1,25 +1,31 @@
 # EGA NSS over (caching) files
 
-We use triggers to export DB data into files, related to
+We export DB data into files, (using [../db/53-nss-triggers.sql](triggers)).
 
-| NSS database | data type | filepath |
-|--------------|-----------|----------|
-| passwd       | users     | `/etc/ega/cache/nss/users` |
-| group        | groups    | `/etc/ega/cache/nss/groups` |
-| shadow       | passwords | `/etc/ega/cache/nss/passwords` |
+| NSS database | data type | filepath                   | mode | owner | group |
+|--------------|-----------|----------------------------|------|-------|-------|
+| passwd       | users     | `${ETC_DIR}/nss/users`     | 644  | root  | root  |
+| group        | groups    | `${ETC_DIR}/nss/groups`    | 644  | root  | root  | 
+| shadow       | passwords | `${ETC_DIR}/nss/passwords` | 640  | root  | shadow  |
 
-Moreover, we cache the authorized ssh keys for each user in `/etc/ega/cache/authorized_keys/<username>`.
+where `${ETC_DIR}` is `/opt/LocalEGA/etc` on the host and `/etc/ega` in the vault-db container.
+
+Moreover, we cache the authorized ssh keys for each user in `${ETC_DIR}/authorized_keys/<username>`.
 
 If the files are pre-created with the right permissions, the postgres user in the database would update their content, and not re-create the files.  
-In particular the shadow/passwords files should be group-owned by the group `shadow` and only readable by that group, and not world-accessible)
+In particular the shadow/passwords files should be group-owned by the group `shadow` and only readable by that group, and not world-accessible).
 
 ## Build
 
 	make
-	sudo make install
+	sudo make install EGA_LIBDIR=/opt/LocalEGA/lib
+	
+Become the root user and run the commands to make the library discoverable:
+
+	echo '/opt/LocalEGA/lib' > /etc/ld.so.conf.d/ega.conf
 	ldconfig -v
 
-Then you update `/etc/nsswitch.conf` such as:
+Then update `/etc/nsswitch.conf` with:
 
 	passwd:         files egafiles systemd
 	group:          files egafiles systemd
@@ -37,10 +43,10 @@ Then you update `/etc/nsswitch.conf` such as:
 	id silverdaz
 
 	# See the group entry
-	getent group -s egafiles submitters
+	getent group -s egafiles requesters
 
 	# See the group entry, without the members
-	getent group -s egafiles submitters | awk -F: '{ print $1 ":" $3 }'
+	getent group -s egafiles requesters | awk -F: '{ print $1 ":" $3 }'
 
 
 ## Debug version
@@ -54,8 +60,8 @@ Since the files in `/etc/ega/cache/authorized_keys/` are not owned by the respec
 
 Therefore, we do not use `AuthorizedKeysFile` and we use the combination of `AuthorizedKeysCommand` and `AuthorizedKeysCommandUser`, in `sshd_config`
 
-	AuthorizedKeysCommand cat /etc/ega/cache/authorized_keys/%u
+	AuthorizedKeysCommand cat /opt/LocalEGA/etc/authorized_keys/%u
 	# %u is the TOKEN for the username
-	AuthorizedKeysCommandUser fega
+	AuthorizedKeysCommandUser lega
 	# because it's actually uid 999, which is postgres _inside_ the database container
 	

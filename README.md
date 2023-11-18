@@ -9,8 +9,7 @@ The required packages are:
 * OpenSSL
 * libpq
 * glib-2.0
-* Compilation tools: make cmake gcc git autoconf ...
-* patch
+* Development tools: make cmake gcc git autoconf patch ...
 * PAM
 
 On Debian/Ubuntu, you can install the dependencies with:
@@ -23,9 +22,9 @@ On Debian/Ubuntu, you can install the dependencies with:
 
 You need to install the following components:
 
-* the [distribution file system](src/fuse) (to output Crypt4GH files)
+* the distribution file system, to [present Crypt4GH files](src/crypt4gh-fs), or [decrypt them locally](src/crypt4gh-sqlite)
 * the [NSS module](src/nss) (to find users)
-* the [PAM modules](src/pam) (to create the user's homedirectory and automount its file system)
+* the [PAM modules](src/pam) to create the user's homedirectory and automount user's file system
 * [patch and deploy the SFTP server](src/openssh)
 
 

@@ -48,8 +48,9 @@ In the Vault database, load the SQL files:
 Update the `nss.*` configurations in `pg.conf`
 
 	# Create the landing directories for the NSS files
-	docker-compose exec --user root vault-db chown postgres /etc/ega/nss
-	docker-compose exec --user root vault-db chown postgres /etc/ega/authorized_keys
+	sudo chown 999 /opt/LocalEGA/etc/nss
+	sudo chown 999:lega /opt/LocalEGA/etc/authorized_keys
+	sudo chmod g+s /opt/LocalEGA/etc/authorized_keys
 	
 	# Call the NSS file creation
 	make nss
