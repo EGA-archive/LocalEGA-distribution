@@ -17,7 +17,7 @@ On Debian/Ubuntu, you can install the dependencies with:
     apt-get update && \
     apt-get install -y --no-install-recommends \
             ca-certificates pkg-config git gcc cmake make automake autoconf patch \
-            libssl-dev libpq-dev libpam0g-dev libglib2.0-dev libfuse3-dev meson ninja
+            libssl-dev libpq-dev libpam0g-dev libglib2.0-dev libfuse3-dev meson ninja-build
 ```
 
 You need to install the following components:

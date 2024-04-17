@@ -4,7 +4,7 @@
 
 We install all in `/opt/LocalEGA`
 
-	sudo mkdir -p /opt/LocalEGA/{bin,etc,lib,home}
+	sudo mkdir -p /opt/LocalEGA/{bin,etc,lib,homes}
 	apt install meson ninja-build libpq-dev openssl
 
 Install libfuse 3.16.2 from the [official repository](https://github.com/libfuse/libfuse).
