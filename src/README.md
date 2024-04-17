@@ -7,8 +7,9 @@ We install all in `/opt/LocalEGA`
 	sudo mkdir -p /opt/LocalEGA/{bin,etc,lib,home}
 	apt install meson ninja-build libpq-dev openssl
 
-Install libfuse 3.16.2
-uncomment `user_allow_other` in `/usr/local/etc/fuse.conf`
+Install libfuse 3.16.2 from the [official repository](https://github.com/libfuse/libfuse).
+
+Uncomment `user_allow_other` in `/usr/local/etc/fuse.conf`
 
 
 ## Install the live distribution: crypt4gh.fs
