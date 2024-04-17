@@ -2,26 +2,21 @@
 
 ## Preliminaries
 
-We install all in /opt/LocalEGA
+We install all in `/opt/LocalEGA`
 
-sudo mkdir -p /opt/LocalEGA/{bin,etc,lib,home}
-
-apt install meson ninja libpq-dev
-openssl 3
+	sudo mkdir -p /opt/LocalEGA/{bin,etc,lib,home}
+	apt install meson ninja-build libpq-dev openssl
 
 Install libfuse 3.16.2
-uncomment `user_allow_other` in /usr/local/etc/fuse.conf
+uncomment `user_allow_other` in `/usr/local/etc/fuse.conf`
 
 
-## Install the live distribution: crypt4gh-db.fs
+## Install the live distribution: crypt4gh.fs
 
 	autoreconf -i
 	./configure --prefix=/opt/LocalEGA
 	make
 	sudo make install
-
-Create fs.conf for the crypt4gh-db.fs
-
 
 
 ## Install the NSS module
@@ -29,11 +24,11 @@ Create fs.conf for the crypt4gh-db.fs
 	make 
 	sudo make install
 
-echo '/opt/LocalEGA/lib' > /etc/ld.so.conf.d/LocalEGA.conf
+	echo '/opt/LocalEGA/lib' > /etc/ld.so.conf.d/LocalEGA.conf
 
-sudo ldconfig -v | grep egafiles
+	sudo ldconfig -v | grep egafiles
 
-In /etc/nsswitch.conf, add `egafiles` such as:
+In `/etc/nsswitch.conf`, add `egafiles` such as:
 
 	passwd:         files egafiles systemd
 	group:          files egafiles systemd
@@ -65,3 +60,5 @@ For the Crypt4GH-fuse:
 	
 	cp crypt4gh-fs/fs.conf.sample /opt/LocalEGA/etc/fuse-vault-db.conf
 	chmod 600 /opt/LocalEGA/etc/fuse-vault-db.conf
+
+Update password in `fuse-vault.db.conf`.
