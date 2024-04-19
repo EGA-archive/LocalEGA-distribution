@@ -1,6 +1,6 @@
 # EGA NSS over (caching) files
 
-We export DB data into files, (using [../db/53-nss-triggers.sql](triggers)).
+We export DB data into files using [triggers](../db/53-nss-triggers.sql).
 
 | NSS database | data type | filepath                   | mode | owner | group |
 |--------------|-----------|----------------------------|------|-------|-------|
