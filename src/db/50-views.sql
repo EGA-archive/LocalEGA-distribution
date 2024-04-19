@@ -38,7 +38,7 @@ WHERE (-- uk.is_enabled = true
 --
 CREATE OR REPLACE VIEW public.requesters AS
 SELECT DISTINCT
-       db2sys_user_id(ut.id)               	AS uid,
+       db2sys_user_id(ut.id)                     AS uid,
        ut.id                                     AS db_uid,
        ut.group_id                                AS gid,
        ut.username                               AS username,
@@ -47,11 +47,6 @@ SELECT DISTINCT
        'EGA Requester'::varchar                  AS gecos,
        '/bin/bash'::varchar                      AS shell
 FROM public.user_table ut
-INNER JOIN public.user_key_table uk ON ut.id = uk.user_id
-WHERE ( ut.is_enabled = true
-        AND
-	uk.key IS NOT NULL
-	AND
-        uk.type IN ('c4gh-v1'::public.key_type, 'ssh-ed25519'::public.key_type)
-      );
+LEFT JOIN public.user_key_table uk ON ut.id = uk.user_id AND uk.type IN ('c4gh-v1'::public.key_type, 'ssh-ed25519'::public.key_type)
+WHERE ( ut.is_enabled = true);
 

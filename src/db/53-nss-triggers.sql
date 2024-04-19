@@ -36,7 +36,7 @@ $BODY$;
 CREATE OR REPLACE TRIGGER build_bulk_users
 AFTER INSERT OR UPDATE OR DELETE
 ON public.user_table
-FOR EACH STATEMENT
+FOR EACH ROW
 EXECUTE PROCEDURE nss.trigger_bulk_users();
 
 CREATE OR REPLACE TRIGGER build_user_keys
@@ -65,7 +65,7 @@ $BODY$;
 CREATE OR REPLACE TRIGGER build_bulk_passwords
 AFTER INSERT OR UPDATE OR DELETE
 ON private.user_password_table
-FOR EACH STATEMENT
+FOR EACH ROW
 EXECUTE PROCEDURE nss.trigger_bulk_passwords();
 
 
