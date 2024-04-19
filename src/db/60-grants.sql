@@ -32,3 +32,5 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA nss TO lega;
 GRANT SELECT ON TABLE public.requesters TO lega;
 GRANT SELECT ON TABLE public.ssh_keys TO lega;
 
+-- Required to write files
+GRANT pg_write_server_files TO lega;

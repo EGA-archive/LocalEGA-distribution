@@ -78,4 +78,6 @@ Copy the system files into place
 	cp ega-sshd.service /etc/systemd/system/ega-sshd.service
 	systemctl daemon-reload
 	
+Finally, start the service:
 
+    systemctl start ega-sshd
